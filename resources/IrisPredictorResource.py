@@ -19,11 +19,12 @@ def predict_knn(features, model):
     """
     
     classes = ['setosa', 'versicolor', 'virginica']
-
-    predicted_class = classes[model.predict(features)]
     
-    return predicted_class
-
+    listed_features = [features]
+    predicted_class = model.predict(listed_features)[0]
+    
+    return classes[predicted_class]
+    
 ### resource
 class IrisPredictorResource():
     """
@@ -64,22 +65,26 @@ class IrisPredictorResource():
             # Check for the validity of json document
             if 'features' not in request.keys():
                 resp.status = falcon.HTTP_400
-                resp.body = "Invalid input\n"
+                resp.body = "Invalid input: no features\n"
                 return
+                
             if not isinstance(request['features'], list):
                 resp.status = falcon.HTTP_400
-                resp.body = "Invalid input\n"
-                return
-            if  not len(request['features']) == 4:
-                resp.status = falcon.HTTP_400
-                resp.body = "Invalid input\n"
-                return
-            if not all(isinstance(request['features'], float):
-                resp.status = falcon.HTTP_400
-                resp.body = "Invalid input\n"
+                resp.body = "Invalid input: features are not in list\n"
                 return
                 
             features = request['features']
+                        
+            if  not len(features) == 4:
+                resp.status = falcon.HTTP_400
+                resp.body = "Invalid input: features are not of length 4\n"
+                return
+            
+            if not all(isinstance(elem, float) for elem in features):
+                resp.status = falcon.HTTP_400
+                resp.body = "Invalid input: features are not real numbers\n"
+                return
+                
             
             ## In this part, you consider the input is correct and 
             ## just need to return the result
