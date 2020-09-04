@@ -19,20 +19,23 @@ def predict_knn(features, model):
     """
     
     classes = ['setosa', 'versicolor', 'virginica']
-    """
-    TODO: 
-    predict the class!
-    """
+
+    predicted_class = classes[model.predict(features)]
+    
     return predicted_class
 
 ### resource
 class IrisPredictorResource():
     """
-    TODO: Documentation
+    Class to predict the iris class on POST
     """
     def __init__(self, model_path, logger):
         """
-        TODO: Documentation
+        Constructor of the predictor resourse object. 
+        Initializes logging and load the predictor model files
+        @params:
+            model_path: math to model files
+            logger : logger associated with the class
         """
         self.logger = logger
         self.model = pickle.load(open(model_path, 'rb'))
@@ -40,7 +43,10 @@ class IrisPredictorResource():
     
     def on_post(self, req, resp):
         """
-        TODO: Documentation
+        Function to be called on POST
+        @params:
+            req : request json sent of POST
+            resp: response json to be filled and sent back after POST
         """
         try:
             self.logger.info("IrisPredictor: reading file")
@@ -54,13 +60,27 @@ class IrisPredictorResource():
                 resp.status = falcon.HTTP_400
                 resp.body = "Invalid JSON\n"
                 return
-            """
-            @TODO: 
-            check the quality of the input file.
-            In case the quality of the input is not valid, 
-            send back the correct resp.body and resp.status
-            """
-
+            
+            # Check for the validity of json document
+            if 'features' not in request.keys():
+                resp.status = falcon.HTTP_400
+                resp.body = "Invalid input\n"
+                return
+            if not isinstance(request['features'], list):
+                resp.status = falcon.HTTP_400
+                resp.body = "Invalid input\n"
+                return
+            if  not len(request['features']) == 4:
+                resp.status = falcon.HTTP_400
+                resp.body = "Invalid input\n"
+                return
+            if not all(isinstance(request['features'], float):
+                resp.status = falcon.HTTP_400
+                resp.body = "Invalid input\n"
+                return
+                
+            features = request['features']
+            
             ## In this part, you consider the input is correct and 
             ## just need to return the result
             prediction = predict_knn(features, self.model)
@@ -70,10 +90,7 @@ class IrisPredictorResource():
 
             self.logger.info('IrisPredictor: Sending the results \n')
             
-            """
-            TODO: use the correct HTTP status code
-            """
-            resp.status = ## FILL HERE! ##
+            resp.status = falcon.HTTP_200
             resp.body = json.dumps(response) + '\n'
 
         except Exception as e:
